@@ -6,25 +6,22 @@ from data import read_data
 from vis import plot_wrapper
 
 
-def main(data_path, out_dir, datatype, target_interval_min):
+def main(data_path, out_dir, datatype, target_interval_min, generate_plot):
     
     dirs = utils.create_dirs(out_dir)
-
-    interpolated_fcst = []
-    interpolated_time = []
-
     forecasts, data_mask, latitude, longitude, valid_times = \
         read_data.read_data(data_path, datatype)
 
     start_time, end_time = utils.get_datetime_range(valid_times)
-    
+
     temporal_interp_wrapper.t_interp_wrapper(
         start_time, end_time, valid_times, dirs['output'], datatype, 
         forecasts, data_mask, latitude, longitude, 
         target_interval_min)
 
-    plot_wrapper.plot_wrapper(interpolated_fcst, interpolated_time, 
-                              latitude, longitude, datatype, dirs['figure'])
+    if generate_plot:
+        plot_wrapper.plot_wrapper(datatype, dirs['figure'],
+                                  dirs['output'], start_time, end_time)
 
 
 def get_example_usage():
@@ -68,6 +65,7 @@ def setup_parser():
 if __name__ == '__main__':
     args = setup_parser()
     main(args.data_path, args.output_dir, 
-         args.data_type, int(args.target_interval_min))
+         args.data_type, int(args.target_interval_min),
+         args.generate_plot)
 
 

@@ -1,13 +1,16 @@
 import os
+import numpy
 from vis import plot_map
 from vis import color_ctl
 import matplotlib.pyplot as plt
 
 def plot_forecasts(fcst, latitude, longitude, fcst_time, datatype, 
                    outdir, colorscale='pysteps',
-                   colorbar_shrink=0.45):
+                   colorbar_shrink=0.45, data_mask=None):
     """plot forecast"""
     plt.figure(figsize=(10, 15))
+    if data_mask is not None:
+        fcst = numpy.ma.masked_where(data_mask==1.0, fcst)
     filename = '{datatype}_{valid_time}.png'.format(
         datatype=datatype,
         valid_time=fcst_time.strftime('%Y%m%d%H%M'))

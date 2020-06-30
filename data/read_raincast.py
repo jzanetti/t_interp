@@ -1,4 +1,3 @@
-import numpy
 from netCDF4 import Dataset, num2date
 
 def read_raincast(raincast_path):

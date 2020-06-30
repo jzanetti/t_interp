@@ -5,6 +5,7 @@ from datetime import timedelta
 from utils import utils
 from interp import temporal_interp
 from data import oi
+from data import T_INTERP_FILENAME
 
 
 def run_interp(valid_times, cur_time, forecast):
@@ -46,10 +47,9 @@ def t_interp_wrapper(start_time, end_time, valid_times,
         interpolated_fcst.append(dask_out[1])
     
     output_path = os.path.join(
-        output_dir, '{datatype}_from_{start_time}_to_{end_time}'.format(
+        output_dir, T_INTERP_FILENAME.format(
             datatype=datatype, start_time=start_time.strftime('%Y%m%d%H%M'),
-            end_time=end_time.strftime('%Y%m%d%H%M'))
-        )
+            end_time=end_time.strftime('%Y%m%d%H%M')))
     
     oi.write_output(output_path, interpolated_fcst, latitude, 
                     longitude, interpolated_time, 
