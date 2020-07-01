@@ -13,7 +13,7 @@ def plot_wrapper(datatype, figure_dir,
         end_time=end_time.strftime('%Y%m%d%H%M')))
     
     forecast, forecast_times, latitude, longitude, data_mask = \
-        read_data.read_interp_data(output_path, datatype)
+        read_data.read_interp_data(output_path)
     
     dask_plot_jobs = []
     for i, fcst_time in enumerate(forecast_times):

@@ -6,21 +6,24 @@ from data import read_data
 from vis import plot_wrapper
 
 
-def main(data_path, out_dir, datatype, target_interval_min, generate_plot):
+def main(data_path, out_dir, output_prefix, target_interval_min, generate_plot):
     
     dirs = utils.create_dirs(out_dir)
+    datapath_config = utils.read_datapath(data_path)
+
     forecasts, data_mask, latitude, longitude, valid_times = \
-        read_data.read_data(data_path, datatype)
+        read_data.read_data(datapath_config)
 
     start_time, end_time = utils.get_datetime_range(valid_times)
 
     temporal_interp_wrapper.t_interp_wrapper(
-        start_time, end_time, valid_times, dirs['output'], datatype, 
+        start_time, end_time, valid_times, dirs['output'],
+        output_prefix, 
         forecasts, data_mask, latitude, longitude, 
         target_interval_min)
 
     if generate_plot:
-        plot_wrapper.plot_wrapper(datatype, dirs['figure'],
+        plot_wrapper.plot_wrapper(output_prefix, dirs['figure'],
                                   dirs['output'], start_time, end_time)
 
 
@@ -44,10 +47,11 @@ def setup_parser():
         epilog=get_example_usage(),
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--data_path', type=str, required=True, 
-                        help='data path to be temporal downscaled')
-    parser.add_argument('--data_type', type=str, required=False,
-                        default='raincast_det', help='data type to be '
-                        'downscaled, e.g., raincast_det')
+                        help='data path to be temporal downscaled '
+                             '(datapath list)')
+    parser.add_argument('--output_prefix', type=str, required=False,
+                        default='raincast', help='data name to be '
+                        'output, e.g., raincast_det')
     parser.add_argument('--output_dir', type=str, required=True, 
                         help='output data directory')
     parser.add_argument('--generate_plot', help='if produce plots',
@@ -57,15 +61,16 @@ def setup_parser():
                         'to be interpolated')
 
     return parser.parse_args(
-        ['--data_path', '/home/szhang/Downloads/raincast_determinstic_202006292200.nc',
-         '--data_type', 'raincast_det', '--output_dir', '/tmp/t_interp',
-         '--generate_plot'])
+        ['--data_path', '/home/szhang/eclipse-workspace/temporal_interp/etc/raincast_interp.yaml',
+         '--output_prefix', 'raincast', '--output_dir', '/tmp/t_interp',
+         # '--generate_plot'
+        ])
 
 
 if __name__ == '__main__':
     args = setup_parser()
     main(args.data_path, args.output_dir, 
-         args.data_type, int(args.target_interval_min),
+         args.output_prefix, int(args.target_interval_min),
          args.generate_plot)
 
 

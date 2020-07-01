@@ -1,6 +1,15 @@
 import os
+import yaml
 import numpy
 from copy import deepcopy
+
+def read_datapath(datapath):
+    """decode datapath from a yaml file"""
+    with open(datapath, 'r') as sample_fid:
+        datapath_config = yaml.safe_load(sample_fid)
+    
+    return datapath_config
+
 
 def get_datetime_boundary(analysis_time_list, t0):
     """get the boundaries (t1 and t2)
@@ -25,25 +34,25 @@ def get_datetime_range(timelist):
 
 
 def get_img_boundary(
-        forecast, t_boundary, valid_dates, prob_index=0):
+        forecast, t_boundary, valid_dates):
     """get the associated forecast according to 
     its boundaries
         * prob_index indicate the index for prob dim, 
             e.g., the first dim of forecast usually 
             store the prob threshold of 25%
     """
-    img1 = forecast[prob_index, valid_dates.index(
+    img1 = forecast[valid_dates.index(
         t_boundary[0]), :, :]
-    img2 = forecast[prob_index, valid_dates.index(
+    img2 = forecast[valid_dates.index(
         t_boundary[1]), :, :]
     img_boundary = numpy.asarray([img1, img2])
     return img_boundary
 
-def extract_raw_img(forecast, valid_times, analysis_time, prob_index=0):
+def extract_raw_img(forecast, valid_times, analysis_time):
     """given the analysis time is within the list
     of original forecast time, return the original fcst"""
     fcst_index = valid_times.index(analysis_time)
-    return forecast[prob_index, fcst_index, :, :]
+    return forecast[fcst_index, :, :]
 
 
 def create_dirs(output_dir):

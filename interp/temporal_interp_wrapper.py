@@ -14,12 +14,11 @@ def run_interp(valid_times, cur_time, forecast):
         valid_times, cur_time)
     if t_boundary is None:
         fcst = utils.extract_raw_img(
-            forecast, valid_times, cur_time, prob_index=0)
+            forecast, valid_times, cur_time)
         return cur_time, fcst
 
     img_boundary = utils.get_img_boundary(
-        forecast, t_boundary, valid_times,
-        prob_index=0)
+        forecast, t_boundary, valid_times)
     r = temporal_interp.t_interp(
         t_boundary, img_boundary, cur_time)
     return cur_time, r

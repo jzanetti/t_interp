@@ -1,0 +1,15 @@
+# if different datatypes have conficted timing, then the one with
+# higher priority would overwrite the data from the one with lower
+# priority
+datatype1:
+  priority: 100
+  type: 'raincast_radar'
+  src: '/home/szhang/Downloads/radar_202006292100.nc'
+datatype2:
+  priority: 100
+  type: 'raincast_radar'
+  src: '/home/szhang/Downloads/radar_202006292200.nc'
+datatype3:
+  priority: 90
+  type: 'raincast_det'
+  src: '/home/szhang/Downloads/raincast_determinstic_202006292200.nc'
