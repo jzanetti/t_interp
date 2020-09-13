@@ -11,6 +11,10 @@ def main(data_path, out_dir, output_prefix, target_interval_min, generate_plot):
     dirs = utils.create_dirs(out_dir)
     datapath_config = utils.read_datapath(data_path)
 
+    if datapath_config['grid'] is not None:
+        output_prefix += '_{}'.format(
+            datapath_config['grid']['name'])
+
     forecasts, data_mask, latitude, longitude, valid_times = \
         read_data.read_data(datapath_config)
 
@@ -24,7 +28,8 @@ def main(data_path, out_dir, output_prefix, target_interval_min, generate_plot):
 
     if generate_plot:
         plot_wrapper.plot_wrapper(output_prefix, dirs['figure'],
-                                  dirs['output'], start_time, end_time)
+                                  dirs['output'], start_time, end_time,
+                                  datapath_config['grid'])
 
 
 def get_example_usage():
@@ -61,13 +66,15 @@ def setup_parser():
                         'to be interpolated')
 
     return parser.parse_args(
-        ['--data_path', '/home/szhang/eclipse-workspace/temporal_interp/etc/raincast_interp.yaml',
-         '--output_prefix', 'raincast', '--output_dir', '/tmp/t_interp',
-         # '--generate_plot'
+        ['--data_path', '/home/szhang/Github/t_interp/etc/qpe_interp.yaml',
+         '--output_prefix', 'qpe', '--output_dir', '/tmp/t_interp',
+         '--generate_plot'
         ])
 
 
 if __name__ == '__main__':
+    """Function to control the workflow of temporal interpolation
+    """
     args = setup_parser()
     main(args.data_path, args.output_dir, 
          args.output_prefix, int(args.target_interval_min),

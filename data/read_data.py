@@ -1,7 +1,9 @@
 import numpy
 from copy import deepcopy
 from data import read_raincast
+from data import read_qpe
 from data import read_interp
+from data import regrid
 
 
 def sort_datapath_based_on_priority(datapath_config):
@@ -47,21 +49,58 @@ def check_latlon(lat0, lon0, lat1, lon1, r=0.01):
 def get_ref_latlon(lat, lon):
     return deepcopy(lat), deepcopy(lon)
 
+
+def get_input_data(data_in, lat_in, lon_in, area_spcifications):
+    src_grid = {'lat': lat_in, 'lon': lon_in, 'data': data_in}
+    cur_area_lat_start = area_spcifications['lats'][1]
+    cur_area_lat_end = area_spcifications['lats'][0]
+
+    cur_area_lon_start = area_spcifications['lons'][0]
+    cur_area_lon_end = area_spcifications['lons'][1]
+    
+    target_res_dg = area_spcifications['res']
+    cur_area_lat0 = numpy.arange(
+        cur_area_lat_start, cur_area_lat_end, target_res_dg)
+    cur_area_lat_size = int(int(len(cur_area_lat0)/10.0)*10.0)
+    cur_area_lat = cur_area_lat0[0:cur_area_lat_size]
+
+    cur_area_lon0 = numpy.arange(
+        cur_area_lon_start, cur_area_lon_end, target_res_dg)
+    cur_area_lon_size = int(int(len(cur_area_lon0)/10.0)*10.0)
+    cur_area_lon = cur_area_lon0[0:cur_area_lon_size]
+
+    lon_out, lat_out = numpy.meshgrid(cur_area_lon, cur_area_lat)
+    
+    lon_out = lon_out % 360.0
+    tar_grid = {'lat': lat_out, 'lon': lon_out}
+    
+    data_out = regrid.grid_interpolation(src_grid, tar_grid)
+    
+    return data_out, lat_out, lon_out
+
+
 def read_data(data_path):
     """read different raw data based on datatype"""
     
-    datapath_list = sort_datapath_based_on_priority(data_path)
+    datapath_list = sort_datapath_based_on_priority(
+        data_path['data_src'])
     
     data_list0 = []
     valid_times0 = []
     for i, datapath in enumerate(datapath_list):
-        if datapath['type'] == 'raincast_det':
-            data_list, data_mask, latitude, longitude, valid_times = \
-                read_raincast.read_raincast(datapath['src'], prob_index=0)
-        elif datapath['type'] == 'raincast_radar':
-            data_list, data_mask, latitude, longitude, valid_times = \
-                read_raincast.read_obs(datapath['src'])
-                
+        try:
+            if datapath['type'] == 'raincast_det':
+                data_list, data_mask, latitude, longitude, valid_times = \
+                    read_raincast.read_raincast(datapath['src'], prob_index=0)
+            elif datapath['type'] == 'raincast_radar':
+                data_list, data_mask, latitude, longitude, valid_times = \
+                    read_raincast.read_obs(datapath['src'])
+            elif datapath['type'] == 'qpe':
+                data_list, data_mask, latitude, longitude, valid_times = \
+                    read_qpe.read_qpe(datapath['src'])
+        except FileNotFoundError:
+            continue
+         
         if i == 0:
             ref_lat, ref_lon = get_ref_latlon(latitude, longitude)
         
@@ -73,8 +112,19 @@ def read_data(data_path):
     ftime_list = sorted(valid_times0)
     fdata_list = [x for _,x in sorted(zip(valid_times0, data_list0))]
     
-    forecasts = numpy.asarray(fdata_list)
+    if data_path['grid'] is not None:
+        fdata_list_new = []
+        for fdata in fdata_list:
+            f_data_new, latitude_new, longitude_new = \
+                get_input_data(fdata, latitude, longitude, data_path['grid'])
+            fdata_list_new.append(f_data_new)
+        forecasts = numpy.asarray(fdata_list_new)
+        return forecasts, data_mask, latitude_new, longitude_new, ftime_list
+    
+    
+    forecasts = numpy.asarray(fdata_list)    
     return forecasts, data_mask, latitude, longitude, ftime_list
+
 
 def read_interp_data(data_path):
     """read interp data"""
@@ -82,6 +132,6 @@ def read_interp_data(data_path):
         read_interp.read_interp_data(data_path)
 
     return forecast, forecast_times, latitude, longitude, data_mask
-    
+
     
     

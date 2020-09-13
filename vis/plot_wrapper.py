@@ -5,7 +5,8 @@ from data import T_INTERP_FILENAME
 from data import read_data
 
 def plot_wrapper(datatype, figure_dir,
-                 output_dir, start_time, end_time):
+                 output_dir, start_time, end_time,
+                 grid):
     
     output_path = os.path.join(
         output_dir, T_INTERP_FILENAME.format(
@@ -20,7 +21,7 @@ def plot_wrapper(datatype, figure_dir,
         dask_plot_jobs.append(
             dask.delayed(plot_forecast.plot_forecasts)(
                 forecast[i, :, :], latitude, longitude, 
-                fcst_time, datatype, figure_dir,
+                fcst_time, datatype, figure_dir, grid,
                 data_mask=data_mask))
 
     dask.compute(

@@ -5,7 +5,10 @@ def read_interp_data(interp_path):
     forecast_times = []
     with Dataset(interp_path) as cur_nc:
         forecast = cur_nc.variables['forecast'][:, :, :]
-        data_mask = cur_nc.variables['data_mask'][:, :]
+        try:
+            data_mask = cur_nc.variables['data_mask'][:, :]
+        except KeyError:
+            data_mask = None
         longitude = cur_nc.variables['longitude'][:]
         latitude = cur_nc.variables['latitude'][:]
         time = cur_nc.variables['time'][:]

@@ -1,0 +1,23 @@
+# if different datatypes have conficted timing, then the one with
+# higher priority would overwrite the data from the one with lower
+# priority
+data_src:
+  datatype1:
+    priority: 70
+    type: 'qpe'
+    src: '/home/szhang/Downloads/qpe_202009110300_T60.nc'
+  datatype2:
+    priority: 70
+    type: 'qpe'
+    src: '/home/szhang/Downloads/qpe_202009110400_T60.nc'
+grid:
+  name: Central_NorthIsland
+  res: 0.02
+  lats:
+    - -38.20
+    - -40.39
+  lons:
+    - 173.75
+    - 178.32
+
+
